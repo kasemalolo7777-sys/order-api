@@ -100,12 +100,33 @@ exports.getOrderById = asyncErrorHandler(async(req,res,next)=>{
 exports.editOrder = asyncErrorHandler(async (req, res, next) => {
   const api = new API(req, res);
   const { id } = api.getParams();
-
-  const updatedOrder = await Order.findByIdAndUpdate(
+  let updatedOrder;
+    let allowedFields =[] 
+       if(req?.role?.fieldsPermissions){
+        allowedFields = [...req?.role?.fieldsPermissions,"createdAt",'stage','status']
+       }
+       if(!req.user.isAdmin){
+        const bodyContent = JSON.parse(JSON.stringify(req.body))
+        for(let key of Object.keys(bodyContent)){
+          if(!allowedFields.includes(key)){
+            delete bodyContent[key]
+          }
+          console.log(bodyContent);
+          
+        }
+            updatedOrder = await Order.findByIdAndUpdate(
+    id,
+    { $set: bodyContent },
+    { new: true, runValidators: true, context: { user: req.user } }
+  );
+       }else{
+        updatedOrder = await Order.findByIdAndUpdate(
     id,
     { $set: req.body },
     { new: true, runValidators: true, context: { user: req.user } }
   );
+       }
+  
 
   if (!updatedOrder) {
     return next(api.errorHandler("not_found", `Order with id ${id} not found`, 404));
@@ -242,5 +263,6 @@ exports.getOrderHistory = asyncErrorHandler(async (req, res, next) => {
       const api = new API(req, res);
   const history = await OrderHistory.find({ orderId: req.params.id }).populate('editedBy', 'name');
       api.dataHandler('fetch',history)
+
 
 });
