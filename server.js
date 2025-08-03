@@ -11,7 +11,7 @@ process.on('uncaughtException', (err) => {
 
 const app = require('./app');
 
-connectDB(false)
+connectDB(true)
 const port = process.env.PORT || 8000;
 
 const server = app.listen(port, () => {
@@ -26,5 +26,6 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
    })
 })
+
 
 
