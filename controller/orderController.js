@@ -33,15 +33,16 @@ exports.createOrder = asyncErrorHandler(async (req,res,next)=>{
 })
 exports.getAllOrders = asyncErrorHandler(async(req,res,next)=>{
        const api = new API(req,res)
-       let allowedFields =[] 
+       let notAllowedFields =[] 
        if(req?.role?.fieldsPermissions){
-        allowedFields = [...req?.role?.fieldsPermissions,"createdAt",'stage','status']
+        notAllowedFields = [...req?.role?.fieldsPermissions,]
+        notAllowedFields = notAllowedFields.map(item => `-${item}`)
        }
-
+   
   api.modify(Order.find().populate({
         path: 'createdBy',
         select: 'userName  -_id' // Only get the role name
-      }).lean()).filter([],['price','orderNumber']).sort().limitFields(allowedFields).paginate()
+      }).lean()).filter([],['price','orderNumber']).sort().limitFields(notAllowedFields).paginate()
   const orders = await api.query
   const totalPages = await Order.countDocuments()
    api.dataHandler('fetch',{
@@ -87,11 +88,11 @@ exports.getAllOrdersBetweenDate = asyncErrorHandler(async (req, res, next) => {
 exports.getOrderById = asyncErrorHandler(async(req,res,next)=>{
        const api = new API(req,res)
        const {id} = api.getParams()
-          let allowedFields =[] 
+          let notAllowedFields =[] 
        if(req?.role?.fieldsPermissions){
-        allowedFields = [...req?.role?.fieldsPermissions,"createdAt",'stage','status']
+        notAllowedFields = [...req?.role?.fieldsPermissions,]
        }
-   const currentOrder = await Order.findById(id).select(allowedFields.join(" "))
+   const currentOrder = await Order.findById(id).select(notAllowedFields.join("-"))
 
   
    api.dataHandler('fetch',currentOrder)
@@ -101,14 +102,14 @@ exports.editOrder = asyncErrorHandler(async (req, res, next) => {
   const api = new API(req, res);
   const { id } = api.getParams();
   let updatedOrder;
-    let allowedFields =[] 
+    let notAllowedFields =[] 
        if(req?.role?.fieldsPermissions){
-        allowedFields = [...req?.role?.fieldsPermissions,"createdAt",'stage','status']
+        notAllowedFields = [...req?.role?.fieldsPermissions]
        }
        if(!req.user.isAdmin){
         const bodyContent = JSON.parse(JSON.stringify(req.body))
         for(let key of Object.keys(bodyContent)){
-          if(!allowedFields.includes(key)){
+          if(notAllowedFields.includes(key)){
             delete bodyContent[key]
           }
           console.log(bodyContent);
@@ -263,6 +264,5 @@ exports.getOrderHistory = asyncErrorHandler(async (req, res, next) => {
       const api = new API(req, res);
   const history = await OrderHistory.find({ orderId: req.params.id }).populate('editedBy', 'name');
       api.dataHandler('fetch',history)
-
 
 });
