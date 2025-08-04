@@ -91,8 +91,9 @@ exports.getOrderById = asyncErrorHandler(async(req,res,next)=>{
           let notAllowedFields =[] 
        if(req?.role?.fieldsPermissions){
         notAllowedFields = [...req?.role?.fieldsPermissions,]
+        notAllowedFields = notAllowedFields.map(item => `-${item}`)
        }
-   const currentOrder = await Order.findById(id).select(notAllowedFields.join("-"))
+   const currentOrder = await Order.findById(id).select(notAllowedFields.join(" "))
 
   
    api.dataHandler('fetch',currentOrder)
@@ -266,3 +267,4 @@ exports.getOrderHistory = asyncErrorHandler(async (req, res, next) => {
       api.dataHandler('fetch',history)
 
 });
+
