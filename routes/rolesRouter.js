@@ -9,7 +9,8 @@ router.post('/',isAuth,checkPermission('Roles','create'),createRole);
 router.get('/',isAuth,checkPermission('Roles','read'),getAllRoles)
 router.get('/:id',isAuth,checkPermission('Roles','read'),getRoleById)
 router.post('/code',isAuth,checkPermission('Roles','create'),createInviteCode)
-router.put('/:api',isAuth,checkPermission('Roles','edit'),editRole)
+router.put('/:id',isAuth,checkPermission('Roles','edit'),editRole)
 module.exports = router;
+
 
  
