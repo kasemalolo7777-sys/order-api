@@ -300,8 +300,9 @@ exports.getUserById = asyncErrorHandler(async(req,res,next)=>{
       const error = api.errorHandler('not_found','user not found')
       next(error)
     }
-    const currentRole = await Role.findById(currentUser.role)
+    const currentRole = await Role.findById(currentUser.roleId)
     
      api.dataHandler('fetch',{user:{currentUser},role:{currentRole}})
   
+
 })
