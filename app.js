@@ -37,12 +37,48 @@ app.use(express.json())
 app.use(cors(corsOptions))
 app.use(limter)
 app.use(requestTime)
+let healthCheckTimer;
+const TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 
+const performHealthCheck = async () => {
+  try {
+    const response = await axios.get('https://order-api-y5ih.onrender.com/api/test');
+    console.log(`Health check response: ${response.status}`);
+  } catch (error) {
+    console.error(`Health check error: ${error.message}`);
+  }
+};
+
+// 🔁 Function to start/reset the timer
+const resetHealthCheckTimer = () => {
+  if (healthCheckTimer) clearTimeout(healthCheckTimer);
+  healthCheckTimer = setTimeout(() => {
+    performHealthCheck();
+    resetHealthCheckTimer(); // restart the timer after running
+  }, TIMEOUT_MS);
+  console.log(`Timer reset at ${new Date().toLocaleTimeString()}`);
+};
+
+// 🚀 Start the timer when server starts
+resetHealthCheckTimer();
+
+const healthCheckMiddleware = (req, res, next) => {
+  resetHealthCheckTimer();
+  next(); // continue to the actual route
+};
 //    ROUTES    //
+
+
+// Attach the middleware globally
+app.use(healthCheckMiddleware);
 
 app.use('/api/user',userRoute)
 app.use('/api/orders',orderRoute)
 app.use('/api/roles',RolesRoute)
+app.get('/api/test',(req,res)=>{
+  res.status(200).json('server is active')
+})
+// 🧠 Function to call your health check
 
 //==============//
 // handling routes not found error
