@@ -70,21 +70,30 @@ exports.getRoleById = asyncErrorHandler(async(req,res,next)=>{
 
 
 // Edit a role
-exports.editRole =
-asyncErrorHandler( async (req, res,next) => {
+exports.editRole =asyncErrorHandler( async (req, res,next) => {
      const api = new API(req,res)
     const { id } = req.params;
     console.log(req.body);
     
     const { name, status, fieldsNames, permissions } = req.body;
-    const role = await Role.findById(id);
-    if (!role) return next(api.errorHandler('not_found', 'Role not found'));
-    role.sectionPermissions = permissions
-   await role.save();
 
-  
+    const updatedRole = await Role.findByIdAndUpdate(
+      req.params.id,
+      {$set:{
+        name,
+        status,
+        fieldsPermissions:fieldsNames,
+        sectionPermissions:permissions
+      },}
+      
+    );
 
-    api.dataHandler('update')
+    if (!updatedRole) {
+        const error = api.errorHandler('not_found','Role not found')
+        next(error)
+    }
+
+    res.json(updatedRole);
   
 })
 
@@ -117,4 +126,5 @@ const newInviteCode = new InviteCode({
  await newInviteCode.save()
  api.dataHandler('create','invite code created and activated correctly ')
 })
+
 
