@@ -77,26 +77,17 @@ asyncErrorHandler( async (req, res,next) => {
     console.log(req.body);
     
     const { name, status, fieldsNames, permissions } = req.body;
+    const role = await Role.findById(id);
+    if (!role) return next(api.errorHandler('not_found', 'Role not found'));
+    role.sectionPermissions = permissions
+   await role.save();
 
-    const updatedRole = await Role.findByIdAndUpdate(
-      id,
-      {$set:{
-        name,
-        status,
-        fieldsPermissions:fieldsNames,
-        sectionPermissions:permissions
-      },}
-      
-    );
+  
 
-    if (!updatedRole) {
-        const error = api.errorHandler('not_found','Role not found')
-        next(error)
-    }
-
-    res.json(updatedRole);
+    api.dataHandler('update')
   
 })
+
 
 // Delete a role
 exports.deleteRole = asyncErrorHandler(async (req, res,next) => {
@@ -126,3 +117,4 @@ const newInviteCode = new InviteCode({
  await newInviteCode.save()
  api.dataHandler('create','invite code created and activated correctly ')
 })
+
