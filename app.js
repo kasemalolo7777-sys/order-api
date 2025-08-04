@@ -38,7 +38,7 @@ app.use(cors(corsOptions))
 app.use(limter)
 app.use(requestTime)
 let healthCheckTimer;
-const TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const TIMEOUT_MS = 14 * 60 * 1000; // 14 minutes
 
 const performHealthCheck = async () => {
   try {
@@ -90,3 +90,4 @@ app.all('*',(req,res,next)=>{
 app.use(globalHandleError)
 
 module.exports = app;
+
