@@ -7,9 +7,9 @@ const jwt = require('jsonwebtoken')
  * 
  * return encrypted Token by jsonWebToken
  */
-const signToken = (id,type='access')=>{
+const signToken = (id,userType="admin",type='access')=>{
     if(type ==='access'){
-        return jwt.sign({id},process.env.ACCESS_TOKEN_SECRET
+        return jwt.sign({id,userType},process.env.ACCESS_TOKEN_SECRET
         //     {
         //     expiresIn:eval(process.env.EXPIRE_ACCESS_TOKEN)
             
@@ -17,7 +17,7 @@ const signToken = (id,type='access')=>{
     )
     }
     else{
-        return jwt.sign({id},process.env.REFRESH_TOKEN_SECRET)  
+        return jwt.sign({id,userType},process.env.REFRESH_TOKEN_SECRET)  
     }
     
 }

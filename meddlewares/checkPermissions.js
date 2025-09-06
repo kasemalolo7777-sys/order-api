@@ -34,10 +34,12 @@ const checkPermission = (sectionName, actionType) => {
 
       // Find section permission by section name
       const section = role.sectionPermissions.find(sec => sec.section === sectionName);
-
+              
+              
       if (!section || !section[actionType]) {
+      
           const error = api.errorHandler('Forbidden',`Permission denied for ${actionType} on ${sectionName}.`)
-        next(error)
+        return next(error)
       }
      req.role = role
       next();

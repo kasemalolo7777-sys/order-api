@@ -57,6 +57,12 @@ exports.getAllRoles =asyncErrorHandler(async(req,res,next)=>{
       totalPages,
     })
 })
+exports.getAllRolesNames =asyncErrorHandler(async(req,res,next)=>{
+       const api = new API(req,res)
+  api.modify(Role.find()).filter().sort().paginate().limitFields(['name','_id'])
+  const Roles = await api.query
+   api.dataHandler('fetch',Roles)
+})
 exports.getRoleById = asyncErrorHandler(async(req,res,next)=>{
        const api = new API(req,res)
   api.modify(Role.findById(req.params.id).lean()).filter().sort().limitFields()
@@ -97,7 +103,6 @@ exports.editRole =asyncErrorHandler( async (req, res,next) => {
   
 })
 
-
 // Delete a role
 exports.deleteRole = asyncErrorHandler(async (req, res,next) => {
     const api = new API(req,res)
@@ -126,5 +131,3 @@ const newInviteCode = new InviteCode({
  await newInviteCode.save()
  api.dataHandler('create','invite code created and activated correctly ')
 })
-
-

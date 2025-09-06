@@ -10,6 +10,8 @@ const { signToken, verifyToken, generateResetToken,sendToEmail, formatDates } = 
 const dotenv = require("dotenv");
 const InviteCode = require("../models/InviteCode");
 const Role = require("../models/Role");
+
+const Employee = require("../models/Employee");
 dotenv.config({path: '../config.env'});
 
 exports.signup = asyncErrorHandler(async (req, res,next) => {
@@ -84,10 +86,11 @@ exports.signup = asyncErrorHandler(async (req, res,next) => {
 });
 exports.login = asyncErrorHandler(async (req, res, next) => {
   const api = new API(req, res);
-  const { email, password } = req.body;
+  const {isAdmin} = req.query
+  const { email, password,name } = req.body;
   // check if user found 
- 
-  const user = await User.findOne({ email }).select("+password");
+ if(isAdmin){
+     const user = await User.findOne({ email }).select("+password");
   if (!email || !password) {
     const error = api.errorHandler("uncomplated_data");
     next(error);
@@ -103,7 +106,7 @@ exports.login = asyncErrorHandler(async (req, res, next) => {
     next(error);
   }
   // generate access token
-  const accessToken = signToken(user._id);
+  const accessToken = signToken(user._id,'admin');
   // generate refresh token
  
   // check if previous refresh token still found and deleted
@@ -119,6 +122,38 @@ exports.login = asyncErrorHandler(async (req, res, next) => {
     role:user.role,
     isVerified:user.isVerified
   } },'user log in and new tokens has been generated');
+ }else{
+   const employee = await Employee.findOne({ name }).select("+password");
+     if (!name || !password) {
+    const error = api.errorHandler("uncomplated_data");
+    next(error);
+  }
+    if (!employee) {
+    const error = api.errorHandler("not_found",'Employee not found');
+    next(error);
+  }
+    // check if password correct
+  const isMatch = await Employee.comparePasswordDB(password, employee.password);
+  if (!isMatch) {
+    const error = api.errorHandler("invalid");
+    next(error);
+  }
+  // generate access token
+  const accessToken = signToken(employee._id,'employee');
+  // generate refresh token
+ 
+  // check if previous refresh token still found and deleted
+  await Token.findOneAndDelete({userId:employee._id})
+  // store new refresh token in database
+  const newToken = await Token.create({token:accessToken,userId:employee._id})
+  // send access and refresh token to db
+  api.dataHandler("create", {   data:{
+    token:newToken.token,
+    nickName:employee.name,
+    role:employee.role,
+  } },'user log in and new tokens has been generated');
+ }
+
 });
 exports.token = asyncErrorHandler(async (req, res, next) => {
   const refreshToken = req.body.token;
@@ -304,5 +339,37 @@ exports.getUserById = asyncErrorHandler(async(req,res,next)=>{
     
      api.dataHandler('fetch',{user:{currentUser},role:{currentRole}})
   
-
 })
+exports.createEmployee = asyncErrorHandler(async (req,res,next)=>{
+  const api = new API(req,res)
+  await Employee.create(req.body)
+  api.dataHandler('create',null,'تم اضافة الموظف لقاعدة البيانات')
+})
+exports.getAllEmployee =asyncErrorHandler(async (req, res, next) => {
+  const api = new API(req, res);
+   
+  // Modify query with filters, sorts, etc.
+  api.modify(
+    Employee.find()
+      .populate({
+        path: 'role',
+        select: 'name status -_id' // Only get the role name
+      })
+      .lean()
+  ).filter().sort().limitFields().paginate();
+
+  const employees = await api.query;
+
+  const totalPages = await Employee.countDocuments();
+
+  // Replace roleId object with just its name
+  const formattedUsers = employees.map(user => ({
+    ...user,
+    role: user.role?.name ,
+  }));
+
+  api.dataHandler('fetch', {
+    users: formatDates(formattedUsers),
+    totalPages
+  });
+});

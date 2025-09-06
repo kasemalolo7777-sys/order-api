@@ -14,6 +14,15 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'Please enter a valid email.']
   },
+  storage:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Storage',
+      required: false
+    },
+    stage:{
+      type:String,
+      
+    },
   photo: String,
   password: {
     type: String,

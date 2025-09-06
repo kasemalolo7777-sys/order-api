@@ -23,7 +23,7 @@ const stageSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   orderNumber: {
-    type: String,
+    type: Number,
     required: true,
     unique: true
   },
@@ -31,6 +31,10 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: false
+  },
+  isApproved:{
+    type:Boolean,
+    default:false
   },
   editedBy: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -40,6 +44,21 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     required: true
+  },
+  numberOfBoxes:{
+    type: Number,
+    min: 0,
+    required: false
+  },
+  finalNumberOfBoxes:{
+    type: Number,
+    min: 0,
+    required: false
+  },
+  finalWeight:{
+    type: Number,
+    min: 0,
+    required: false
   },
   status: {
     type: String,
@@ -58,8 +77,17 @@ const orderSchema = new mongoose.Schema({
   },
   storage:{
      type: String,
-    required: true
+    required: false
   },
+  materialType:{
+        type:String,
+        enum:['رول',"دغما","باكيت"]
+    },
+    materialResourceType:{
+        type:String,
+        enum:['ستوك','اوردر','stock','order'],
+        required:true
+    },
   length: {
     type: Number,
     required: true,
@@ -118,7 +146,6 @@ const orderSchema = new mongoose.Schema({
       default: 0,
       min: 0
     },
-    returnDate: Date
   },
 
   // مرتجع الفرازة
@@ -128,7 +155,6 @@ const orderSchema = new mongoose.Schema({
       default: 0,
       min: 0
     },
-    returnDate: Date
   },
   returnStore:{
     returnedWeight: {
@@ -136,11 +162,15 @@ const orderSchema = new mongoose.Schema({
       default: 0,
       min: 0
     },
-    returnDate: Date
   },
   dimensionsRecord: {
     type: String,
     required: false
+  },
+  isApproved:{
+    type: Boolean,
+    required: false,
+    default:false
   },
 
   // 6 Stages

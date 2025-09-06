@@ -9,6 +9,9 @@ const rateLimiter = require('express-rate-limit')
 const userRoute = require('./routes/authRouter');
 const orderRoute = require('./routes/orderRouter')
 const RolesRoute = require('./routes/rolesRouter')
+const StorageRoute = require('./routes/storageRouter')
+const clientRoute = require('./routes/clientRouter')
+const materialRoute = require('./routes/materialRouter')
 
 //===================================================//
 //============== meddlewares ========================//
@@ -38,7 +41,7 @@ app.use(cors(corsOptions))
 app.use(limter)
 app.use(requestTime)
 let healthCheckTimer;
-const TIMEOUT_MS = 14 * 60 * 1000; // 14 minutes
+const TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 const performHealthCheck = async () => {
   try {
@@ -66,15 +69,16 @@ const healthCheckMiddleware = (req, res, next) => {
   resetHealthCheckTimer();
   next(); // continue to the actual route
 };
-//    ROUTES    //
 
-
-// Attach the middleware globally
 app.use(healthCheckMiddleware);
+//    ROUTES    //
 
 app.use('/api/user',userRoute)
 app.use('/api/orders',orderRoute)
 app.use('/api/roles',RolesRoute)
+app.use('/api/storage',StorageRoute)
+app.use('/api/client',clientRoute)
+app.use('/api/material',materialRoute)
 app.get('/api/test',(req,res)=>{
   res.status(200).json('server is active')
 })
@@ -90,4 +94,3 @@ app.all('*',(req,res,next)=>{
 app.use(globalHandleError)
 
 module.exports = app;
-

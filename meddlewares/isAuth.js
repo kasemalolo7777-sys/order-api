@@ -3,6 +3,7 @@ const asyncErrorHandler = require("../wrapper_functions/asyncErrorHandler");
 
 const User = require("../models/User");
 const { verifyToken } = require("../utils");
+const Employee = require("../models/Employee");
 
 const isAuth = asyncErrorHandler(async (req,res,next)=>{
     //1- read he token & check if it exits
@@ -23,7 +24,8 @@ const isAuth = asyncErrorHandler(async (req,res,next)=>{
       //await verifyToken(token,process.env.ACCESS_TOKEN_SECRET)
 
     // 3- if the user exits 
-      const user = await User.findById(decodedToken.id)
+    if(decodedToken?.userType === 'admin'){
+        const user = await User.findById(decodedToken.id)
       if(!user){
         next(api.errorHandler('not_found'))
       }
@@ -32,6 +34,18 @@ const isAuth = asyncErrorHandler(async (req,res,next)=>{
     // 5- allow user to access route 
          req.user = user
     next()
+    }else{
+        const user = await Employee.findById(decodedToken.id)
+      if(!user){
+        next(api.errorHandler('not_found'))
+      }
+     
+    // 4- if the user changed password after token was issued  
+    // 5- allow user to access route 
+         req.user = user
+    next()
+    }
+    
 
 })
 module.exports = isAuth
