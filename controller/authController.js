@@ -89,13 +89,15 @@ exports.login = asyncErrorHandler(async (req, res, next) => {
   const {isAdmin} = req.query
   const { email, password,name } = req.body;
   // check if user found 
- if(isAdmin){
+ if(JSON.parse(isAdmin)){
      const user = await User.findOne({ email }).select("+password");
   if (!email || !password) {
     const error = api.errorHandler("uncomplated_data");
     next(error);
   }
   if (!user) {
+    console.log(isAdmin);
+    
     const error = api.errorHandler("not_found",'email not found');
     next(error);
   }
@@ -133,7 +135,7 @@ exports.login = asyncErrorHandler(async (req, res, next) => {
     next(error);
   }
     // check if password correct
-  const isMatch = await Employee.comparePasswordDB(password, employee.password);
+  const isMatch = await employee.comparePasswordDB(password, employee.password);
   if (!isMatch) {
     const error = api.errorHandler("invalid");
     next(error);
@@ -372,4 +374,5 @@ exports.getAllEmployee =asyncErrorHandler(async (req, res, next) => {
     users: formatDates(formattedUsers),
     totalPages
   });
+
 });
