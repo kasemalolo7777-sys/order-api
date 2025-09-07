@@ -15,11 +15,11 @@ const EmployeeSchema = new mongoose.Schema({
     ref: 'Role'
   },
       stage:{
-      type:String,
+      type:[String],
       
     },
         storage:{
-      type:String,
+      type:[String],
       
     },
 },{
