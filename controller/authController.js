@@ -381,6 +381,4 @@ exports.getAllEmployee =asyncErrorHandler(async (req, res, next) => {
     users: formatDates(formattedUsers),
     totalPages
   });
-
 });
-

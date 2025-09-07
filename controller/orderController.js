@@ -366,7 +366,7 @@ exports.approveOrder = asyncErrorHandler(async (req, res, next) => {
     "Cancelled"
   ];
 
-  if ((req.user.stage !== stageName || req.user.storage !== currentOrder.storage) && !req.user.isAdmin) {
+  if ((!req.user?.stage?.includes('stageName') || !req.user?.storage?.includes(currentOrder.storage)) && !req.user.isAdmin) {
     return next(api.errorHandler('bad_request', 'لا تملك الصلاحية للموافقة على هذه المرحلة'));
   }
    let updatedOrder;
