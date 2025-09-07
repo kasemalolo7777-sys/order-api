@@ -332,7 +332,14 @@ exports.getUserById = asyncErrorHandler(async(req,res,next)=>{
   console.log(token);
   let decodedToken = await verifyToken(token,process.env.ACCESS_TOKEN_SECRET) 
       console.log(decodedToken);
-    const currentUser = await User.findById(decodedToken.id)
+      let currentUser ;
+      if(decodedToken.userType === 'employee'){
+        currentUser = await Employee.findById(decodedToken.id)
+      }else{
+         currentUser = await User.findById(decodedToken.id)
+      }
+    
+    
     if(!currentUser){
       const error = api.errorHandler('not_found','user not found')
       next(error)
@@ -376,3 +383,4 @@ exports.getAllEmployee =asyncErrorHandler(async (req, res, next) => {
   });
 
 });
+
